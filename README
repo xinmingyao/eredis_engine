@@ -1,0 +1,19 @@
+
+embeded redis storage engine for erlang
+
+
+
+install:
+
+./rebar get-deps
+
+./rebar compile
+
+test
+
+./rebar ct
+
+TODO:
+ implements all redis api in erlang nif
+ 
+
