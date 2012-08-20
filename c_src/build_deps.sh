@@ -55,7 +55,7 @@ case "$1" in
             git clone git://github.com/xinmingyao/redis redis
         fi
 
-        (cd redis && make )
+        (cd redis && git checkout 2.6 && make )
         (cd .. && ./make_libredisa.sh) 
         ;;
 esac
