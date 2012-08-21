@@ -54,9 +54,9 @@ case "$1" in
         if [ ! -d redis ]; then
             git clone git://github.com/xinmingyao/redis redis
         fi
-
-        (cd redis && git checkout 2.6 && make )
-        (cd .. && ./make_libredisa.sh) 
+	(cd $BASEDIR/redis/deps/jemalloc/ && ./configure && make)
+        (cd $BASEDIR/redis && git checkout 2.6 && make )
+        (cd $BASEDIR && ./make_libredisa.sh) 
         ;;
 esac
 
