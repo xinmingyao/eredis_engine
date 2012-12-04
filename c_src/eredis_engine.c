@@ -43,9 +43,9 @@ static void eredis_resource_cleanup(ErlNifEnv* env, void* arg);
 static ErlNifFunc nif_funcs[] =
 {
     {"open", 3, eredis_open},
-    {"put", 3, eredis_put},
-    {"get", 2, eredis_get},
-    {"delete", 2, eredis_delete},
+    {"put", 4, eredis_put},
+    {"get", 3, eredis_get},
+    {"delete", 3, eredis_delete},
     {"save_db",2,eredis_save}
 };
 
@@ -55,9 +55,13 @@ ERL_NIF_TERM eredis_put(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   eredis_handle * handle;
   ErlNifBinary key;
   ErlNifBinary value;
+  int db_index;
   if(enif_get_resource(env,argv[0],eleveldb_db_RESOURCE,(void **)&handle) &&
-     enif_inspect_binary(env,argv[1],&key) && enif_inspect_binary(env,argv[2],&value)){ 
-    redisDb * db= &server.db[handle->dbid];
+     enif_inspect_binary(env,argv[1],&key) 
+     && enif_inspect_binary(env,argv[2],&value)
+     && enif_get_int(env,argv[3],&db_index)
+     ){ 
+    redisDb * db= &server.db[db_index];
     robj * k1 = createStringObject(( char*)key.data,key.size);
     robj * v1 = createStringObject(( char*)value.data,value.size);     
     // robj * k1 = createStringObject("123",3);
@@ -72,9 +76,12 @@ ERL_NIF_TERM eredis_get(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   eredis_handle * handle;
   ErlNifBinary key;
+  int db_index;
   if(enif_get_resource(env,argv[0],eleveldb_db_RESOURCE,(void **)&handle) &&
-     enif_inspect_binary(env,argv[1],&key)){ 
-    redisDb *db=&server.db[handle->dbid];
+     enif_inspect_binary(env,argv[1],&key)
+     && enif_get_int(env,argv[2],&db_index)
+     ){ 
+    redisDb *db=&server.db[db_index];
     robj * k1 = createStringObject((char*)key.data,key.size);
     robj * v1 = lookupKey(db,k1);
     if(v1==NULL){
@@ -95,9 +102,12 @@ ERL_NIF_TERM eredis_delete(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   eredis_handle * handle;
   ErlNifBinary key;
+  int db_index;
   if(enif_get_resource(env,argv[0],eleveldb_db_RESOURCE,(void **)&handle) &&
-     enif_inspect_binary(env,argv[1],&key)){ 
-    redisDb* db=&server.db[handle->dbid];
+     enif_inspect_binary(env,argv[1],&key)
+     && enif_get_int(env,argv[2],&db_index)
+     ){ 
+    redisDb* db=&server.db[db_index];
     robj * k1 = createStringObject((char*)key.data,key.size);
     int ret = dbDelete(db,k1);
     if(ret==0){
@@ -116,8 +126,6 @@ ERL_NIF_TERM eredis_open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
  eredis_handle* handle =
     (eredis_handle*) enif_alloc_resource(eleveldb_db_RESOURCE,
 					      sizeof(eredis_handle));
- handle->dbid=0;
-
   char name[4096];
   char config[4096];
   int is_open;
@@ -156,7 +164,7 @@ ERL_NIF_TERM eredis_save(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 static int on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
     ErlNifResourceFlags flags = (ErlNifResourceFlags)(ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER);
-    eleveldb_db_RESOURCE = enif_open_resource_type(env, NULL, "eleveldb_db_resource",
+    eleveldb_db_RESOURCE = enif_open_resource_type(env, NULL, "eredis_resource",
                                                     &eredis_resource_cleanup,
                                                     flags, NULL);
 //    eleveldb_itr_RESOURCE = enif_open_resource_type(env, NULL, "eleveldb_itr_resource",
@@ -204,7 +212,7 @@ static int on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 
 static void eredis_resource_cleanup(ErlNifEnv* env, void* arg)
 {
-    // Delete any dynamically allocated memory stored in eleveldb_db_handle
+    // Delete any dynamically allocated memory
     eredis_handle* handle = (eredis_handle*)arg;
     // enif_release_resource(handle->db[0]);
     // delete handle->db;

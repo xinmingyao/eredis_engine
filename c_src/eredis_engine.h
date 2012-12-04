@@ -4,7 +4,6 @@
 #include "redis.h"
 typedef struct _eredis_handle
 {
-  int dbid;
   char * db_name;
 } eredis_handle;
 

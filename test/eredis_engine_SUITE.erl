@@ -26,15 +26,17 @@ all()->
 
     
 save(Config)->
+    Index=0,
     Db=?config(db,Config),
-    ok=eredis_engine:put(Db,<<"a1">>,<<"b1">>),
-    ok=eredis_engine:put(Db,<<"a2">>,<<"b1">>),
+    ok=eredis_engine:put(Db,<<"a1">>,<<"b1">>,Index),
+    ok=eredis_engine:put(Db,<<"a2">>,<<"b1">>,Index),
     eredis_engine:save_db(Db,code:lib_dir(eredis_engine,'test/redis2.rdb')).
 
 get(Config)->
+    Index=1,
     Db=?config(db,Config),
-    ok=eredis_engine:put(Db,<<"get">>,<<"v1">>),
+    ok=eredis_engine:put(Db,<<"get">>,<<"v1">>,Index),
     timer:sleep(50),
-    {ok,<<"v1">>}=eredis_engine:get(Db,<<"get">>).
+    {ok,<<"v1">>}=eredis_engine:get(Db,<<"get">>,Index).
 
 

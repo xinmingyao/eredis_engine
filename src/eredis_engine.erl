@@ -1,8 +1,8 @@
 -module(eredis_engine).
 -export([open/3,
-	 put/3,
-	 get/2,
-	 delete/2,
+	 put/4,
+	 get/3,
+	 delete/3,
 	 save_db/2
 	]).
 -export([init/0]).
@@ -34,11 +34,11 @@ open(_ConfigFile,_Name,_IsOpen)->
 save_db(_Ref,_FilePath)->	      
     erlang:nif_error({error,not_loader}).
 
-put(_Ref,_Key,_Value)->	      
+put(_Ref,_Key,_Value,_DbIndex)->	      
     erlang:nif_error({error,not_loader}).
 
-get(_Ref,_Key)->
+get(_Ref,_Key,_DbIndex)->
     erlang:nif_error({error,not_loader}).
 
-delete(_Ref,_Key)->
+delete(_Ref,_Key,_DbIndex)->
     erlang:nif_error({error,not_loader}).
